@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Comments & Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .comments-section, .top-users-section {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .comment {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .comment:hover {
+            transform: translateY(-2px);
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .comment-content {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .like-section {
+            display: flex;
+            align-items: center;
+        }
+        .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+        .user-rank {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+        .top-user {
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+        }
+        .rank {
+            font-weight: bold;
+            color: #1890ff;
+            width: 30px;
+            text-align: center;
+        }
+        .user-info {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .user-likes {
+            font-weight: bold;
+        }
+        .gold { color: #ffd700; }
+        .silver { color: #c0c0c0; }
+        .bronze { color: #cd7f32; }
+        .shardul-badge {
+            background-color: #ffd700;
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Comments & Users</h1>
+    
+    <div class="container">
+        <div class="comments-section">
+            <h2>Comments</h2>
+            <div id="comments-container"></div>
+        </div>
+        
+        <div class="top-users-section">
+            <h2>Top Liked Users</h2>
+            <div id="top-users-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Updated with Indian names
+        const usernames = ["Kishor", "Shardul", "Saurabh", "Gagan", "Gaurav", "Hitanshu", "Yash", "Viraj", "Harsh", "Vishal"];
+        const comments = [
+            "This is really helpful, thanks for sharing!",
+            "I never thought about it this way before.",
+            "Great point! Completely agree with you.",
+            "Could you elaborate more on this topic?",
+            "Interesting perspective, but I see it differently.",
+            "This made my day! So inspiring.",
+            "I've had a similar experience recently.",
+            "Thanks for the advice, will try this out.",
+            "Not sure I understand, can you explain further?",
+            "This is exactly what I needed to hear today!",
+            "Has anyone tried this with different parameters?",
+            "The results might vary depending on the context.",
+            "I appreciate the detailed explanation.",
+            "This seems a bit outdated, any newer methods?",
+            "Can confirm, this works perfectly in my case."
+        ];
+
+        // Generate random comments with Shardul having more likes
+        function generateRandomComments(count) {
+            const commentsList = [];
+            
+            for (let i = 0; i < count; i++) {
+                let randomUsername = usernames[Math.floor(Math.random() * usernames.length)];
+                const randomComment = comments[Math.floor(Math.random() * comments.length)];
+                let randomLikes = Math.floor(Math.random() * 100);
+                
+                // Make Shardul's comments more likely to have higher likes
+                if (randomUsername === "Shardul") {
+                    randomLikes = Math.floor(Math.random() * 50) + 50; // Between 50-100 likes
+                }
+                
+                commentsList.push({
+                    username: randomUsername,
+                    content: randomComment,
+                    likes: randomLikes,
+                    id: Date.now() + i
+                });
+            }
+            
+            return commentsList;
+        }
+
+        // Calculate top users based on total likes
+        function calculateTopUsers(commentsList) {
+            const userStats = {};
+            
+            // Calculate total likes per user
+            commentsList.forEach(comment => {
+                if (!userStats[comment.username]) {
+                    userStats[comment.username] = {
+                        totalLikes: 0,
+                        commentCount: 0
+                    };
+                }
+                userStats[comment.username].totalLikes += comment.likes;
+                userStats[comment.username].commentCount++;
+            });
+            
+            // Convert to array and sort by total likes
+            return Object.entries(userStats)
+                .map(([username, stats]) => ({
+                    username,
+                    totalLikes: stats.totalLikes,
+                    commentCount: stats.commentCount
+                }))
+                .sort((a, b) => b.totalLikes - a.totalLikes);
+        }
+
+        // Display comments sorted by likes
+        function displayComments(commentsList) {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = '';
+            
+            // Sort comments by likes (descending)
+            const sortedComments = [...commentsList].sort((a, b) => b.likes - a.likes);
+            
+            sortedComments.forEach((comment) => {
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment';
+                
+                commentElement.innerHTML = `
+                    <div class="comment-header">
+                        <span>${comment.username}</span>
+                        <span>${new Date(comment.id).toLocaleDateString()}</span>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                    <div class="like-section">
+                        <button class="like-btn" data-id="${comment.id}">👍</button>
+                        <span class="like-count">${comment.likes} likes</span>
+                    </div>
+                `;
+                
+                container.appendChild(commentElement);
+            });
+            
+            // Add event listeners to like buttons
+            document.querySelectorAll('.like-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const commentId = parseInt(this.getAttribute('data-id'));
+                    const comment = commentsList.find(c => c.id === commentId);
+                    if (comment) {
+                        comment.likes++;
+                        displayComments(commentsList);
+                        displayTopUsers(calculateTopUsers(commentsList));
+                    }
+                });
+            });
+        }
+
+        // Display top users
+        function displayTopUsers(topUsers) {
+            const container = document.getElementById('top-users-container');
+            container.innerHTML = '';
+            
+            topUsers.forEach((user, index) => {
+                const userElement = document.createElement('div');
+                userElement.className = `user-rank ${index < 3 ? 'top-user' : ''}`;
+                
+                // Add medal emoji for top 3
+                let medal = '';
+                if (index === 0) medal = '<span class="gold">🥇</span>';
+                else if (index === 1) medal = '<span class="silver">🥈</span>';
+                else if (index === 2) medal = '<span class="bronze">🥉</span>';
+                
+                // Special badge for Shardul if he's in top 3
+                const shardulBadge = user.username === "Shardul" && index < 3 ? 
+                    '<span class="shardul-badge">MOST LIKED</span>' : '';
+                
+                userElement.innerHTML = `
+                    <div class="rank">${index < 3 ? medal : index + 1}</div>
+                    <div class="user-info">
+                        <div><strong>${user.username}</strong> ${shardulBadge}</div>
+                        <div>${user.commentCount} comments</div>
+                    </div>
+                    <div class="user-likes">${user.totalLikes} likes</div>
+                `;
+                
+                container.appendChild(userElement);
+            });
+        }
+
+        // Initialize the page
+        const randomComments = generateRandomComments(15);
+        displayComments(randomComments);
+        displayTopUsers(calculateTopUsers(randomComments));
+    </script>
+</body>
+</html>
