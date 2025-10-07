@@ -3,33 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blood Report Analyzer (File Upload Mock)</title>
+    <title>Blood Report Analyzer </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* 1. Glassmorphism Base Styles */
+        .glass-container {
+            /* Background (Dark, Semi-Transparent) */
+            background-color: rgba(255, 255, 255, 0.05); 
+            /* Blur Effect (The core of Glassmorphism) */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* For Safari support */
+            /* Light Border */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Subtle Shadow */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glass-container:hover {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 2. Custom Scrollbar for analysis list (Dark Theme) */
         .analysis-list::-webkit-scrollbar { width: 6px; }
-        .analysis-list::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        .analysis-list::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3); /* Lighter scrollbar thumb */
+            border-radius: 3px;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
-    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl p-6 md:p-10">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Blood Report Analyzer</h1>
-        <p class="text-sm text-red-500 mb-6">
-            ⚠️ **DISCLAIMER:** File upload is a **mock feature** here. Reliable analysis requires advanced server-side processing (OCR/PDF Parsing) which is not possible with basic client-side JS.
+<body class="bg-gray-900 min-h-screen p-4 md:p-8 text-gray-100">
+    
+    <div class="fixed inset-0 -z-10 bg-gradient-to-br from-indigo-900 via-gray-900 to-purple-900 opacity-90"></div>
+    
+    <div class="max-w-7xl mx-auto glass-container rounded-xl p-6 md:p-10">
+        <h1 class="text-3xl font-bold text-gray-50 mb-6 border-b border-gray-700 pb-2"> Blood Report Analyzer</h1>
+        <p class="text-sm text-yellow-400 mb-6">
+            ⚠️ **DISCLAIMER:** File upload is a **mock feature**. Use for demonstration only.
         </p>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md border border-gray-200 h-fit sticky top-4">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Upload Report File </h2>
+            <div class="lg:col-span-1 glass-container p-6 rounded-lg shadow-2xl h-fit sticky top-4">
+                <h2 class="text-xl font-semibold mb-4 text-gray-200">Upload Report File </h2>
                 
-                <label for="reportFileInput" class="block text-sm font-medium text-gray-700 mb-2">Select PDF or Image Report</label>
+                <label for="reportFileInput" class="block text-sm font-medium text-gray-300 mb-2">Select PDF or Image Report</label>
                 <div class="flex flex-col space-y-3">
-                    <input type="file" id="reportFileInput" accept=".pdf,image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="handleFileUpload()">
+                    <input type="file" id="reportFileInput" accept=".pdf,image/*" class="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-700 file:text-gray-100 hover:file:bg-indigo-600" onchange="handleFileUpload()">
                     
-                    <p id="fileNameDisplay" class="text-sm text-gray-600 italic">No file selected.</p>
+                    <p id="fileNameDisplay" class="text-sm text-gray-400 italic">No file selected.</p>
 
-                    <button id="analyzeButton" onclick="analyzeReport()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out font-medium shadow-md cursor-not-allowed opacity-50" disabled>
+                    <button id="analyzeButton" onclick="analyzeReport()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-500 transition duration-300 ease-in-out font-medium shadow-md cursor-not-allowed opacity-50" disabled>
                         Analyze Report
                     </button>
                 </div>
@@ -37,32 +62,264 @@
 
             <div class="lg:col-span-2">
                 
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Analysis Summary</h2>
-                    <div id="analysisResults" class="analysis-list h-40 overflow-y-auto space-y-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
-                        <p class="text-gray-500 italic">Select and upload a file to see results.</p>
+                <div class="glass-container p-6 rounded-lg shadow-2xl mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-200">Analysis Summary</h2>
+                    <div id="analysisResults" class="analysis-list h-40 overflow-y-auto space-y-3 p-2 bg-gray-800 rounded-lg border border-gray-700">
+                        <p class="text-gray-400 italic">Select and upload a file to see results.</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    <div class="md:col-span-2 bg-white p-4 border rounded-lg shadow-md">
-                        <h2 class="text-xl font-semibold mb-2 text-gray-700">Comparative Graph</h2>
-                        <div class="p-2 border rounded-lg shadow-inner">
+                    <div class="md:col-span-2 glass-container p-4 rounded-lg shadow-2xl">
+                        <h2 class="text-xl font-semibold mb-2 text-gray-200">Comparative Graph</h2>
+                        <div class="p-2 bg-gray-800 rounded-lg border border-gray-700">
                             <canvas id="reportChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="md:col-span-1 bg-white p-4 border rounded-lg shadow-md">
-                        <h2 class="text-xl font-semibold mb-0 text-gray-700">Normal Ranges Reference</h2>
-                        <div id="normalRangesReference" class="h-full space-y-0 p-2 text-sm bg-gray-50 rounded-lg border border-gray-100">
-                            <p class="text-gray-500 italic">Ranges will appear here after analysis.</p>
+                    <div class="md:col-span-1 glass-container p-4 rounded-lg shadow-2xl">
+                        <h2 class="text-xl font-semibold mb-2 text-gray-200">Normal Ranges </h2>
+                        <div id="normalRangesReference" class="h-full space-y-2 p-2 text-sm bg-gray-800 rounded-lg border border-gray-700 text-gray-200">
+                            <p class="text-gray-400 italic">Ranges will appear here after analysis.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        // --- JAVASCRIPT CODE ---
+
+        // 1. Define Standard Normal Ranges (Mock Data)
+        const NORMALRANGES = {
+            WBC: { min: 4.5, max: 11.0, unit: "x 10^9/L" },          
+            RBC: { min: 4.2, max: 6.1, unit: "x 10^12/L" },          
+            Hb: { min: 12.0, max: 17.5, unit: "g/dL" },              
+            PLAT: { min: 150, max: 450, unit: "x 10^9/L" },          
+            GLUCOSE: { min: 70, max: 100, unit: "mg/dL" },           
+            HEART_RATE: { min: 60, max: 100, unit: "bpm" },          
+        };
+
+        let reportChartInstance = null;
+        let currentPatientData = null;
+
+        // 2. Mock Parsing Logic (Simulates data extraction)
+        function mockParseFile(file) {
+            console.log(`Simulating parsing of file: ${file.name}`);
+            
+            // Randomly select one of three mock scenarios
+            const resultType = Math.random(); 
+            
+            let mockData;
+            if (resultType < 0.33) {
+                // Scenario 1: Mostly Normal
+                mockData = { WBC: 7.5, RBC: 5.0, Hb: 14.5, PLAT: 320, GLUCOSE: 92, HEART_RATE: 70 };
+            } else if (resultType < 0.66) {
+                // Scenario 2: High Anomalies
+                mockData = { WBC: 15.2, RBC: 5.5, Hb: 16.0, PLAT: 480, GLUCOSE: 135, HEART_RATE: 85 };
+            } else {
+                 // Scenario 3: Low Anomalies
+                mockData = { WBC: 3.8, RBC: 3.5, Hb: 11.2, PLAT: 200, GLUCOSE: 88, HEART_RATE: 55 };
+            }
+            
+            return mockData;
+        }
+
+        // 3. File Upload Handler
+        function handleFileUpload() {
+            const fileInput = document.getElementById('reportFileInput');
+            const file = fileInput.files[0];
+            const analyzeButton = document.getElementById('analyzeButton');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            if (file) {
+                fileNameDisplay.textContent = `File Selected: ${file.name}`;
+                analyzeButton.disabled = false;
+                analyzeButton.classList.remove('cursor-not-allowed', 'opacity-50');
+                
+                currentPatientData = mockParseFile(file);
+                
+            } else {
+                fileNameDisplay.textContent = 'No file selected.';
+                analyzeButton.disabled = true;
+                analyzeButton.classList.add('cursor-not-allowed', 'opacity-50');
+                currentPatientData = null;
+                document.getElementById('analysisResults').innerHTML = '<p class="text-gray-400 italic">Select and upload a file to see results.</p>';
+                document.getElementById('normalRangesReference').innerHTML = '<p class="text-gray-400 italic">Ranges will appear here after analysis.</p>';
+                if (reportChartInstance) reportChartInstance.destroy();
+            }
+        }
+
+        /**
+         * Main function to perform analysis and update the UI.
+         */
+        function analyzeReport() {
+            if (!currentPatientData) {
+                document.getElementById('analysisResults').innerHTML = '<p class="text-red-400 font-medium">Please select a file first.</p>';
+                return;
+            }
+
+            const patientData = currentPatientData;
+            const resultsDiv = document.getElementById('analysisResults');
+            resultsDiv.innerHTML = '';
+
+            const analysisResults = [];
+            const chartLabels = [];
+            const patientValues = [];
+            const normalMidPoints = [];
+            let hasAnomalies = false;
+            const rangesReferenceHTML = [];
+
+            // 4. Iterate through data and perform analysis
+            for (const key in patientData) {
+                const value = patientData[key];
+                const range = NORMAL_RANGES[key];
+                
+                if (range && typeof value === 'number') {
+                    // Data for chart and reference
+                    chartLabels.push(key);
+                    patientValues.push(value);
+                    normalMidPoints.push((range.min + range.max) / 2);
+
+                    rangesReferenceHTML.push(`
+                        <div class="flex justify-between border-b border-gray-700 last:border-b-0 py-1">
+                            <span class="font-medium text-gray-300">${key}:</span>
+                            <span class="text-green-500">${range.min} - ${range.max} ${range.unit}</span>
+                        </div>
+                    `);
+
+                    // Analysis Logic (colors adjusted for dark theme)
+                    let color = 'text-green-500'; // Green for normal
+                    let icon = '✅';
+                    let message = `Your **${key}** is **${value} ${range.unit}**, which is within the normal range (${range.min} - ${range.max}).`;
+
+                    if (value < range.min) {
+                        color = 'text-cyan-400'; // Cyan/Light Blue for low
+                        icon = '⬇️';
+                        message = `Your **${key}** is **LOW** (${value} ${range.unit}). The normal range is ${range.min} - ${range.max}.`;
+                        hasAnomalies = true;
+                    } else if (value > range.max) {
+                        color = 'text-red-400'; // Red for high
+                        icon = '⬆️';
+                        message = `Your **${key}** is **HIGH** (${value} ${range.unit}). The normal range is ${range.min} - ${range.max}.`;
+                        hasAnomalies = true;
+                    }
+
+                    analysisResults.push({ message, color, icon });
+                }
+            }
+
+            // 5. Display Analysis Results (colors adjusted for dark theme)
+            const anomalyHeader = hasAnomalies 
+                ? '<div class="bg-red-800 bg-opacity-30 p-3 rounded-lg border border-red-700 mb-4 font-semibold text-red-400">🚨 Attention: One or more values are outside the normal range.</div>'
+                : '<div class="bg-green-800 bg-opacity-30 p-3 rounded-lg border border-green-700 mb-4 font-semibold text-green-400">✨ All analyzed parameters are within the normal range.</div>';
+            
+            resultsDiv.innerHTML = anomalyHeader;
+
+            analysisResults.forEach(result => {
+                const resultElement = document.createElement('p');
+                resultElement.className = `${result.color} font-medium text-sm`;
+                resultElement.innerHTML = `${result.icon} ${result.message.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}`; 
+                resultsDiv.appendChild(resultElement);
+            });
+
+            // 6. Update Normal Ranges Reference Box
+            document.getElementById('normalRangesReference').innerHTML = rangesReferenceHTML.join('');
+
+
+            // 7. Render Chart
+            renderChart(chartLabels, patientValues, normalMidPoints);
+        }
+
+        /**
+         * Renders the comparative Chart.js graph (colors updated for dark theme).
+         */
+        function renderChart(labels, patientData, normalData) {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+
+            if (reportChartInstance) {
+                reportChartInstance.destroy();
+            }
+
+            // Global Chart.js settings for dark theme
+            Chart.defaults.color = '#e5e7eb'; // Default text color (gray-200)
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)'; // Axis/Grid line color
+
+            const allValues = [...patientData, ...normalData];
+            const dataMin = Math.min(...allValues);
+            const dataMax = Math.max(...allValues);
+            const scalePadding = (dataMax - dataMin) > 0 ? 0.1 * (dataMax - dataMin) : 5;
+
+            reportChartInstance = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Value',
+                            data: patientData,
+                            backgroundColor: 'rgba(99, 102, 241, 0.8)', // Indigo-500
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1,
+                            order: 2, 
+                        },
+                        {
+                            label: 'Normal Mid-Point Target',
+                            data: normalData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.9)', // Emerald-500
+                            borderColor: 'rgba(5, 150, 105, 1)',
+                            borderWidth: 2,
+                            type: 'line', 
+                            pointRadius: 6,
+                            pointStyle: 'crossRot',
+                            order: 1, 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: dataMin - scalePadding, 
+                            max: dataMax + scalePadding,
+                            title: {
+                                display: true,
+                                text: 'Value',
+                                color: '#e5e7eb'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parameter Comparison: Patient vs. Normal Mid-Point',
+                            color: '#e5e7eb'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
     
     <script>
         // --- JAVASCRIPT CODE ---
