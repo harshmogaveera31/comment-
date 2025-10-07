@@ -3,266 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Comments & Users</title>
+    <title>Blood Report Analyzer (File Upload Mock)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1, h2 {
-            text-align: center;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-        }
-        .comments-section, .top-users-section {
-            flex: 1;
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .comment {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .comment:hover {
-            transform: translateY(-2px);
-        }
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        .comment-content {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .like-section {
-            display: flex;
-            align-items: center;
-        }
-        .like-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 5px;
-        }
-        .user-rank {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-        }
-        .top-user {
-            background-color: #e6f7ff;
-            border-left: 4px solid #1890ff;
-        }
-        .rank {
-            font-weight: bold;
-            color: #1890ff;
-            width: 30px;
-            text-align: center;
-        }
-        .user-info {
-            flex: 1;
-            margin: 0 10px;
-        }
-        .user-likes {
-            font-weight: bold;
-        }
-        .gold { color: #ffd700; }
-        .silver { color: #c0c0c0; }
-        .bronze { color: #cd7f32; }
-        .shardul-badge {
-            background-color: #ffd700;
-            color: #000;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-left: 10px;
-            font-weight: bold;
-        }
+        .analysis-list::-webkit-scrollbar { width: 6px; }
+        .analysis-list::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body>
-    <h1>Top Comments & Users</h1>
-    
-    <div class="container">
-        <div class="comments-section">
-            <h2>Comments</h2>
-            <div id="comments-container"></div>
-        </div>
-        
-        <div class="top-users-section">
-            <h2>Top Liked Users</h2>
-            <div id="top-users-container"></div>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl p-6 md:p-10">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Blood Report Analyzer</h1>
+        <p class="text-sm text-red-500 mb-6">
+            ⚠️ **DISCLAIMER:** File upload is a **mock feature** here. Reliable analysis requires advanced server-side processing (OCR/PDF Parsing) which is not possible with basic client-side JS.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md border border-gray-200 h-fit sticky top-4">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Upload Report File </h2>
+                
+                <label for="reportFileInput" class="block text-sm font-medium text-gray-700 mb-2">Select PDF or Image Report</label>
+                <div class="flex flex-col space-y-3">
+                    <input type="file" id="reportFileInput" accept=".pdf,image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="handleFileUpload()">
+                    
+                    <p id="fileNameDisplay" class="text-sm text-gray-600 italic">No file selected.</p>
+
+                    <button id="analyzeButton" onclick="analyzeReport()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out font-medium shadow-md cursor-not-allowed opacity-50" disabled>
+                        Analyze Report
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Analysis Summary</h2>
+                    <div id="analysisResults" class="analysis-list h-40 overflow-y-auto space-y-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                        <p class="text-gray-500 italic">Select and upload a file to see results.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <div class="md:col-span-2 bg-white p-4 border rounded-lg shadow-md">
+                        <h2 class="text-xl font-semibold mb-2 text-gray-700">Comparative Graph</h2>
+                        <div class="p-2 border rounded-lg shadow-inner">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1 bg-white p-4 border rounded-lg shadow-md">
+                        <h2 class="text-xl font-semibold mb-0 text-gray-700">Normal Ranges Reference</h2>
+                        <div id="normalRangesReference" class="h-full space-y-0 p-2 text-sm bg-gray-50 rounded-lg border border-gray-100">
+                            <p class="text-gray-500 italic">Ranges will appear here after analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
+    
     <script>
-        // Updated with Indian names
-        const usernames = ["Kishor", "Shardul", "Saurabh", "Gagan", "Gaurav", "Hitanshu", "Yash", "Viraj", "Harsh", "Vishal"];
-        const comments = [
-            "This is really helpful, thanks for sharing!",
-            "I never thought about it this way before.",
-            "Great point! Completely agree with you.",
-            "Could you elaborate more on this topic?",
-            "Interesting perspective, but I see it differently.",
-            "This made my day! So inspiring.",
-            "I've had a similar experience recently.",
-            "Thanks for the advice, will try this out.",
-            "Not sure I understand, can you explain further?",
-            "This is exactly what I needed to hear today!",
-            "Has anyone tried this with different parameters?",
-            "The results might vary depending on the context.",
-            "I appreciate the detailed explanation.",
-            "This seems a bit outdated, any newer methods?",
-            "Can confirm, this works perfectly in my case."
-        ];
+        // --- JAVASCRIPT CODE ---
 
-        // Generate random comments with Shardul having more likes
-        function generateRandomComments(count) {
-            const commentsList = [];
+        // 1. Define Standard Normal Ranges (Mock Data)
+        const NORMAL_RANGES = {
+            WBC: { min: 4.5, max: 11.0, unit: "x 10^9/L" },          
+            RBC: { min: 4.2, max: 6.1, unit: "x 10^12/L" },          
+            Hb: { min: 12.0, max: 17.5, unit: "g/dL" },              
+            PLAT: { min: 150, max: 450, unit: "x 10^9/L" },          
+            GLUCOSE: { min: 70, max: 100, unit: "mg/dL" },           
+            HEART_RATE: { min: 60, max: 100, unit: "bpm" },          
+        };
+
+        let reportChartInstance = null; // Global Chart Instance
+        let currentPatientData = null; // Store data extracted from mock parsing
+
+        // 2. Mock Parsing Logic (Replaces actual file processing)
+        /**
+         * Simulates parsing a blood report file to extract key values.
+         * In a real application, this would be an AJAX call to a server-side OCR/PDF parser.
+         * @returns {Object} Mock patient data.
+         */
+        function mockParseFile(file) {
+            console.log(`Simulating parsing of file: ${file.name}`);
             
-            for (let i = 0; i < count; i++) {
-                let randomUsername = usernames[Math.floor(Math.random() * usernames.length)];
-                const randomComment = comments[Math.floor(Math.random() * comments.length)];
-                let randomLikes = Math.floor(Math.random() * 100);
-                
-                // Make Shardul's comments more likely to have higher likes
-                if (randomUsername === "Shardul") {
-                    randomLikes = Math.floor(Math.random() * 50) + 50; // Between 50-100 likes
-                }
-                
-                commentsList.push({
-                    username: randomUsername,
-                    content: randomComment,
-                    likes: randomLikes,
-                    id: Date.now() + i
-                });
+            // --- MOCK DATA LOGIC ---
+            // We use a simple randomized mock data set to simulate different results.
+            const resultType = Math.random(); 
+            
+            let mockData;
+            if (resultType < 0.33) {
+                // Scenario 1: Mostly Normal
+                mockData = {
+                    WBC: 7.5,
+                    RBC: 5.0,
+                    Hb: 14.5,
+                    PLAT: 320,
+                    GLUCOSE: 92,
+                    HEART_RATE: 70,
+                };
+            } else if (resultType < 0.66) {
+                // Scenario 2: High Anomalies
+                mockData = {
+                    WBC: 15.2,  // High
+                    RBC: 5.5,
+                    Hb: 16.0,
+                    PLAT: 480,  // High
+                    GLUCOSE: 135, // High
+                    HEART_RATE: 85,
+                };
+            } else {
+                 // Scenario 3: Low Anomalies
+                mockData = {
+                    WBC: 3.8,   // Low
+                    RBC: 3.5,   // Low
+                    Hb: 11.2,   // Low
+                    PLAT: 200, 
+                    GLUCOSE: 88,
+                    HEART_RATE: 55, // Low
+                };
             }
             
-            return commentsList;
+            return mockData;
         }
 
-        // Calculate top users based on total likes
-        function calculateTopUsers(commentsList) {
-            const userStats = {};
-            
-            // Calculate total likes per user
-            commentsList.forEach(comment => {
-                if (!userStats[comment.username]) {
-                    userStats[comment.username] = {
-                        totalLikes: 0,
-                        commentCount: 0
-                    };
-                }
-                userStats[comment.username].totalLikes += comment.likes;
-                userStats[comment.username].commentCount++;
-            });
-            
-            // Convert to array and sort by total likes
-            return Object.entries(userStats)
-                .map(([username, stats]) => ({
-                    username,
-                    totalLikes: stats.totalLikes,
-                    commentCount: stats.commentCount
-                }))
-                .sort((a, b) => b.totalLikes - a.totalLikes);
+        // 3. File Upload Handler
+        function handleFileUpload() {
+            const fileInput = document.getElementById('reportFileInput');
+            const file = fileInput.files[0];
+            const analyzeButton = document.getElementById('analyzeButton');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            if (file) {
+                fileNameDisplay.textContent = `File Selected: ${file.name}`;
+                analyzeButton.disabled = false;
+                analyzeButton.classList.remove('cursor-not-allowed', 'opacity-50');
+                
+                // MOCK STEP: Immediately "parse" the file to get the mock data
+                currentPatientData = mockParseFile(file);
+                
+            } else {
+                fileNameDisplay.textContent = 'No file selected.';
+                analyzeButton.disabled = true;
+                analyzeButton.classList.add('cursor-not-allowed', 'opacity-50');
+                currentPatientData = null;
+                // Optionally clear results on file removal/cancel
+                document.getElementById('analysisResults').innerHTML = '<p class="text-gray-500 italic">Select and upload a file to see results.</p>';
+                document.getElementById('normalRangesReference').innerHTML = '<p class="text-gray-500 italic">Ranges will appear here after analysis.</p>';
+                if (reportChartInstance) reportChartInstance.destroy();
+            }
         }
 
-        // Display comments sorted by likes
-        function displayComments(commentsList) {
-            const container = document.getElementById('comments-container');
-            container.innerHTML = '';
-            
-            // Sort comments by likes (descending)
-            const sortedComments = [...commentsList].sort((a, b) => b.likes - a.likes);
-            
-            sortedComments.forEach((comment) => {
-                const commentElement = document.createElement('div');
-                commentElement.className = 'comment';
+        /**
+         * Main function to perform analysis and update the UI.
+         */
+        function analyzeReport() {
+            if (!currentPatientData) {
+                document.getElementById('analysisResults').innerHTML = '<p class="text-red-500 font-medium">Please select a file first.</p>';
+                return;
+            }
+
+            const patientData = currentPatientData;
+            const resultsDiv = document.getElementById('analysisResults');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            const analysisResults = [];
+            const chartLabels = [];
+            const patientValues = [];
+            const normalMidPoints = [];
+            let hasAnomalies = false;
+            const rangesReferenceHTML = [];
+
+            // 4. Iterate through data and perform analysis (unchanged logic)
+            for (const key in patientData) {
+                const value = patientData[key];
+                const range = NORMAL_RANGES[key];
                 
-                commentElement.innerHTML = `
-                    <div class="comment-header">
-                        <span>${comment.username}</span>
-                        <span>${new Date(comment.id).toLocaleDateString()}</span>
-                    </div>
-                    <div class="comment-content">${comment.content}</div>
-                    <div class="like-section">
-                        <button class="like-btn" data-id="${comment.id}">👍</button>
-                        <span class="like-count">${comment.likes} likes</span>
-                    </div>
-                `;
-                
-                container.appendChild(commentElement);
-            });
-            
-            // Add event listeners to like buttons
-            document.querySelectorAll('.like-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const commentId = parseInt(this.getAttribute('data-id'));
-                    const comment = commentsList.find(c => c.id === commentId);
-                    if (comment) {
-                        comment.likes++;
-                        displayComments(commentsList);
-                        displayTopUsers(calculateTopUsers(commentsList));
+                if (range && typeof value === 'number') {
+                    // Data for chart
+                    chartLabels.push(key);
+                    patientValues.push(value);
+                    normalMidPoints.push((range.min + range.max) / 2);
+
+                    // Data for Normal Ranges Reference box
+                    rangesReferenceHTML.push(`
+                        <div class="flex justify-between border-b last:border-b-0 py-1">
+                            <span class="font-medium text-gray-700">${key}:</span>
+                            <span class="text-green-700">${range.min} - ${range.max} ${range.unit}</span>
+                        </div>
+                    `);
+
+                    // Analysis Logic
+                    let color = 'text-green-600';
+                    let icon = '✅';
+                    let message = `Your **${key}** is **${value} ${range.unit}**, which is within the normal range (${range.min} - ${range.max}).`;
+
+                    if (value < range.min) {
+                        color = 'text-blue-600';
+                        icon = '⬇️';
+                        message = `Your **${key}** is **LOW** (${value} ${range.unit}). The normal range is ${range.min} - ${range.max}.`;
+                        hasAnomalies = true;
+                    } else if (value > range.max) {
+                        color = 'text-red-600';
+                        icon = '⬆️';
+                        message = `Your **${key}** is **HIGH** (${value} ${range.unit}). The normal range is ${range.min} - ${range.max}.`;
+                        hasAnomalies = true;
                     }
-                });
-            });
-        }
 
-        // Display top users
-        function displayTopUsers(topUsers) {
-            const container = document.getElementById('top-users-container');
-            container.innerHTML = '';
+                    analysisResults.push({ message, color, icon });
+                }
+            }
+
+            // 5. Display Analysis Results
+            const anomalyHeader = hasAnomalies 
+                ? '<div class="bg-red-100 p-3 rounded-lg border border-red-200 mb-4 font-semibold text-red-700">🚨 Attention: One or more values are outside the normal range.</div>'
+                : '<div class="bg-green-100 p-3 rounded-lg border border-green-200 mb-4 font-semibold text-green-700">✨ All analyzed parameters are within the normal range.</div>';
             
-            topUsers.forEach((user, index) => {
-                const userElement = document.createElement('div');
-                userElement.className = `user-rank ${index < 3 ? 'top-user' : ''}`;
-                
-                // Add medal emoji for top 3
-                let medal = '';
-                if (index === 0) medal = '<span class="gold">🥇</span>';
-                else if (index === 1) medal = '<span class="silver">🥈</span>';
-                else if (index === 2) medal = '<span class="bronze">🥉</span>';
-                
-                // Special badge for Shardul if he's in top 3
-                const shardulBadge = user.username === "Shardul" && index < 3 ? 
-                    '<span class="shardul-badge">MOST LIKED</span>' : '';
-                
-                userElement.innerHTML = `
-                    <div class="rank">${index < 3 ? medal : index + 1}</div>
-                    <div class="user-info">
-                        <div><strong>${user.username}</strong> ${shardulBadge}</div>
-                        <div>${user.commentCount} comments</div>
-                    </div>
-                    <div class="user-likes">${user.totalLikes} likes</div>
-                `;
-                
-                container.appendChild(userElement);
+            resultsDiv.innerHTML = anomalyHeader;
+
+            analysisResults.forEach(result => {
+                const resultElement = document.createElement('p');
+                resultElement.className = `${result.color} font-medium text-sm`;
+                resultElement.innerHTML = `${result.icon} ${result.message.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}`; 
+                resultsDiv.appendChild(resultElement);
             });
+
+            // 6. Update Normal Ranges Reference Box
+            document.getElementById('normalRangesReference').innerHTML = rangesReferenceHTML.join('');
+
+
+            // 7. Render Chart
+            renderChart(chartLabels, patientValues, normalMidPoints);
         }
 
-        // Initialize the page
-        const randomComments = generateRandomComments(15);
-        displayComments(randomComments);
-        displayTopUsers(calculateTopUsers(randomComments));
+        /**
+         * Renders the comparative Chart.js graph.
+         */
+        function renderChart(labels, patientData, normalData) {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+
+            if (reportChartInstance) {
+                reportChartInstance.destroy();
+            }
+
+            // Determine the minimum and maximum scale values dynamically
+            const allValues = [...patientData, ...normalData];
+            const dataMin = Math.min(...allValues);
+            const dataMax = Math.max(...allValues);
+            const scalePadding = (dataMax - dataMin) > 0 ? 0.1 * (dataMax - dataMin) : 5; // Add padding, minimum 5
+
+            reportChartInstance = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Patient Value',
+                            data: patientData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)', 
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 1,
+                            order: 2, 
+                        },
+                        {
+                            label: 'Normal Mid-Point Target',
+                            data: normalData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.9)', 
+                            borderColor: 'rgba(5, 150, 105, 1)',
+                            borderWidth: 2,
+                            type: 'line', 
+                            pointRadius: 6,
+                            pointStyle: 'crossRot',
+                            order: 1, 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: dataMin - scalePadding, 
+                            max: dataMax + scalePadding,
+                            title: {
+                                display: true,
+                                text: 'Value'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parameter Comparison: Patient vs. Normal Mid-Point'
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
